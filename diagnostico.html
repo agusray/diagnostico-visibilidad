@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagnóstico de Visibilidad Local</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; }
+    h1, h2 { color: #222; }
+    .stars { font-size: 24px; color: gold; }
+    .empty { color: #ccc; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f0f0f0; }
+    #map { height: 300px; margin-top: 20px; }
+    #basicInfo, #stats, #keywordsSection, #rankingSection, #recommendations, #mapSection {
+      margin-top: 20px; display: none;
+    }
+  </style>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+</head>
+<body>
+  <h1>Diagnóstico de Visibilidad Local</h1>
+  <form id="businessForm">
+    <label for="businessName">Nombre o dirección del negocio:</label><br />
+    <input type="text" id="businessName" required style="width: 100%; padding: 8px;" />
+    <button type="submit" style="margin-top: 10px; padding: 8px 16px;">Analizar</button>
+  </form>
+
+  <section id="basicInfo">
+    <h2>Información básica</h2>
+    <p><strong>Nombre:</strong> <span id="bizName"></span></p>
+    <p><strong>Dirección:</strong> <span id="bizAddress"></span></p>
+    <p><strong>Categoría:</strong> <span id="bizCategory"></span></p>
+  </section>
+
+  <section id="stats">
+    <h2>Estrellas y reseñas</h2>
+    <div class="stars" id="starsDisplay"></div>
+    <p><strong>Reseñas:</strong> <span id="reviewCount"></span></p>
+  </section>
+
+  <section id="keywordsSection">
+    <h2>Sugerencias de Keywords</h2>
+    <ul id="keywordList"></ul>
+  </section>
+
+  <section id="rankingSection">
+    <h2>Ranking frente a competidores (2 km)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Posición</th><th>Negocio</th><th>Distancia</th>
+        </tr>
+      </thead>
+      <tbody id="rankingTable"></tbody>
+    </table>
+  </section>
+
+  <section id="recommendations">
+    <h2>Recomendaciones</h2>
+    <ul id="recommendationsList"></ul>
+  </section>
+
+  <section id="mapSection">
+    <h2>Mapa</h2>
+    <div id="map"></div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const form = document.getElementById("businessForm");
+
+    function getSimulatedData(businessName) {
+      return {
+        name: businessName,
+        address: "Av. Ejemplo 123, Buenos Aires",
+        category: "Restaurante",
+        stars: 4.3,
+        reviews: 120,
+        keywords: ["restaurante", "comida argentina", "pizza", "delivery", "comida rápida"],
+        ranking: [
+          { position: 1, name: businessName, distance: "0 m" },
+          { position: 2, name: "Competidor 1", distance: "800 m" },
+          { position: 3, name: "Competidor 2", distance: "1.2 km" },
+          { position: 4, name: "Competidor 3", distance: "1.8 km" }
+        ],
+        recommendations: [
+          "Mejorar las reseñas solicitando feedback a clientes.",
+          "Optimizar la descripción con palabras clave relevantes.",
+          "Aumentar la frecuencia de publicaciones en Google My Business."
+        ],
+        location: { lat: -34.6037, lng: -58.3816 } // Buenos Aires simulado
+      };
+    }
+
+    function displayStars(stars) {
+      const fullStars = Math.floor(stars);
+      const halfStar = stars - fullStars >= 0.5;
+      const maxStars = 5;
+      let starsHtml = "";
+
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += "★";
+      }
+      if (halfStar) starsHtml += "☆";
+      for (let i = starsHtml.length; i < maxStars; i++) {
+        starsHtml += "<span class='empty'>★</span>";
+      }
+      return starsHtml;
+    }
+
+    function updateUI(data) {
+      document.getElementById("basicInfo").style.display = "block";
+      document.getElementById("bizName").textContent = data.name;
+      document.getElementById("bizAddress").textContent = data.address;
+      document.getElementById("bizCategory").textContent = data.category;
+
+      document.getElementById("stats").style.display = "block";
+      document.getElementById("starsDisplay").innerHTML = displayStars(parseFloat(data.stars));
+      document.getElementById("reviewCount").textContent = data.reviews;
+
+      document.getElementById("keywordsSection").style.display = "block";
+      const keywordList = document.getElementById("keywordList");
+      keywordList.innerHTML = "";
+      data.keywords.forEach((kw) => {
+        const li = document.createElement("li");
+        li.textContent = kw;
+        keywordList.appendChild(li);
+      });
+
+      document.getElementById("rankingSection").style.display = "block";
+      const rankingTable = document.getElementById("rankingTable");
+      rankingTable.innerHTML = "";
+      data.ranking.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${item.position}</td><td>${item.name}</td><td>${item.distance}</td>`;
+        rankingTable.appendChild(tr);
+      });
+
+      document.getElementById("recommendations").style.display = "block";
+      const recList = document.getElementById("recommendationsList");
+      recList.innerHTML = "";
+      data.recommendations.forEach((rec) => {
+        const li = document.createElement("li");
+        li.textContent = rec;
+        recList.appendChild(li);
+      });
+
+      document.getElementById("mapSection").style.display = "block";
+
+      // Mapa con Leaflet
+      if (window.map) {
+        window.map.remove();
+      }
+      window.map = L.map("map").setView([data.location.lat, data.location.lng], 14);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+      }).addTo(window.map);
+
+      // Marcador negocio
+      L.marker([data.location.lat, data.location.lng])
+        .addTo(window.map)
+        .bindPopup(`${data.name} (Tu negocio)`)
+        .openPopup();
+
+      // Marcadores competidores
+      data.ranking.forEach((item) => {
+        if (item.name !== data.name) {
+          const offsetLat = data.location.lat + (Math.random() - 0.5) * 0.02;
+          const offsetLng = data.location.lng + (Math.random() - 0.5) * 0.02;
+          L.marker([offsetLat, offsetLng])
+            .addTo(window.map)
+            .bindPopup(`${item.name} (Competidor)`);
+        }
+      });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const businessName = document.getElementById("businessName").value.trim();
+      if (!businessName) return alert("Por favor, ingrese el nombre o dirección del negocio.");
+      const data = getSimulatedData(businessName);
+      updateUI(data);
+    });
+  </script>
+</body>
+</html>
