@@ -2,335 +2,158 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Diagnóstico de Visibilidad Local</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnóstico de Visibilidad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
     body {
-      margin: 0; padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: #f5f7fa;
-      color: #333;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
+      font-family: 'Montserrat', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 2rem;
+      color: #222;
     }
-
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
     h1 {
-      font-weight: 600;
-      font-size: 2.8rem;
-      margin-bottom: 10px;
+      font-size: 2rem;
+      margin-bottom: 1rem;
       color: #111;
-      text-align: center;
     }
-
-    p.lead {
-      font-weight: 400;
-      font-size: 1.1rem;
-      color: #555;
-      margin-bottom: 40px;
-      max-width: 600px;
-      text-align: center;
+    label {
+      display: block;
+      margin-top: 1rem;
     }
-
-    form {
+    input {
       width: 100%;
-      max-width: 480px;
-      display: flex;
-      gap: 12px;
-      margin-bottom: 40px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 14px 16px;
-      font-size: 1rem;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      border: 2px solid #ddd;
-      transition: border-color 0.3s ease;
     }
-
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #0077ff;
-      box-shadow: 0 0 8px rgba(0, 119, 255, 0.3);
-    }
-
     button {
-      padding: 14px 24px;
-      background: #0077ff;
-      color: white;
+      margin-top: 1.5rem;
+      background: #000;
+      color: #fff;
+      padding: 0.8rem 1.2rem;
       border: none;
-      font-weight: 600;
-      font-size: 1rem;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
-
-    button:hover {
-      background: #005ecc;
+    .output {
+      margin-top: 2rem;
     }
-
-    .results {
-      width: 100%;
-      max-width: 720px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      padding: 30px 40px;
-      display: none;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    .card {
-      background: #f9fbff;
-      border-radius: 12px;
-      padding: 20px 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.6rem;
-      color: #005ecc;
-      margin-bottom: 15px;
-    }
-
-    .basic-info p,
-    .stars-reviews p {
-      margin: 6px 0;
-      font-size: 1rem;
-    }
-
-    .stars {
-      font-size: 26px;
-      color: #ffb400;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
-    }
-
-    ul.keywords-list,
-    ul.recommendations-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    ul.keywords-list li,
-    ul.recommendations-list li {
-      background: #e3f2ff;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: #0077ff;
-      box-shadow: 0 2px 6px rgba(0,119,255,0.15);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 1rem;
-    }
-
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-
-    th {
-      background: #e6f0ff;
-      color: #005ecc;
-    }
-
-    #map {
-      height: 320px;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    @media (max-width: 600px) {
-      form {
-        flex-direction: column;
-      }
-
-      button {
-        width: 100%;
-      }
-
-      .results {
-        padding: 20px;
-      }
+    .highlight {
+      background: #f2fd05;
+      padding: 0.5rem;
+      border-radius: 6px;
     }
   </style>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
 </head>
 <body>
+  <div class="container">
+    <h1>Diagnóstico de Visibilidad en Google Maps</h1>
+    <p>Ingresá los datos del restaurante para generar un análisis de visibilidad:</p>
 
-  <h1>Diagnóstico de Visibilidad Local</h1>
-  <p class="lead">Ingresá el nombre o dirección de tu negocio para obtener un análisis rápido de tu presencia en Google Maps y recomendaciones para mejorar.</p>
+    <form id="visibility-form">
+      <label for="name">Nombre del Restaurante</label>
+      <input type="text" id="name" name="name" required />
 
-  <form id="businessForm" autocomplete="off" spellcheck="false">
-    <input type="text" id="businessName" placeholder="Ej: Restaurante La Cava" required />
-    <button type="submit">Analizar</button>
-  </form>
+      <label for="address">Dirección</label>
+      <input type="text" id="address" name="address" required />
 
-  <div class="results" id="resultsContainer">
+      <label for="keyword">Keyword (ej: pizza, bar, hamburguesas)</label>
+      <input type="text" id="keyword" name="keyword" required />
 
-    <section class="card basic-info">
-      <h2>Información básica</h2>
-      <p><strong>Nombre:</strong> <span id="bizName"></span></p>
-      <p><strong>Dirección:</strong> <span id="bizAddress"></span></p>
-      <p><strong>Categoría:</strong> <span id="bizCategory"></span></p>
-    </section>
+      <button type="submit">Iniciar Diagnóstico</button>
+    </form>
 
-    <section class="card stars-reviews">
-      <h2>Calificación y Reseñas</h2>
-      <div class="stars" id="starsDisplay"></div>
-      <p><strong>Cantidad de reseñas:</strong> <span id="reviewCount"></span></p>
-    </section>
-
-    <section class="card keywords">
-      <h2>Palabras clave sugeridas</h2>
-      <ul class="keywords-list" id="keywordList"></ul>
-    </section>
-
-    <section class="card ranking">
-      <h2>Ranking frente a competidores (2 km)</h2>
-      <table>
-        <thead>
-          <tr><th>Posición</th><th>Negocio</th><th>Distancia</th></tr>
-        </thead>
-        <tbody id="rankingTable"></tbody>
-      </table>
-    </section>
-
-    <section class="card recommendations">
-      <h2>Recomendaciones</h2>
-      <ul class="recommendations-list" id="recommendationsList"></ul>
-    </section>
-
-    <section class="card map-section">
-      <h2>Mapa</h2>
-      <div id="map"></div>
-    </section>
-
+    <div class="output" id="results"></div>
   </div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const form = document.getElementById("businessForm");
-    const resultsContainer = document.getElementById("resultsContainer");
+    const form = document.getElementById('visibility-form');
+    const resultsDiv = document.getElementById('results');
 
-    function getSimulatedData(businessName) {
-      // Simulamos datos de Local Falcon + Google Business
-      return {
-        name: businessName,
-        address: "Av. Ejemplo 123, Buenos Aires",
-        category: "Restaurante",
-        stars: 4.3,
-        reviews: 120,
-        keywords: ["restaurante", "comida argentina", "pizza", "delivery", "comida rápida"],
-        ranking: [
-          { position: 1, name: businessName, distance: "0 m" },
-          { position: 2, name: "Competidor 1", distance: "800 m" },
-          { position: 3, name: "Competidor 2", distance: "1.2 km" },
-          { position: 4, name: "Competidor 3", distance: "1.8 km" }
-        ],
-        recommendations: [
-          "Solicitar reseñas a clientes satisfechos para mejorar reputación.",
-          "Optimizar el perfil con palabras clave relevantes.",
-          "Publicar ofertas y novedades periódicamente en Google My Business."
-        ],
-        location: { lat: -34.6037, lng: -58.3816 } // Buenos Aires simulada
-      };
-    }
+    const API_KEY = '5602c0551829cb1c8917119ab40a5d0b';
 
-    function displayStars(stars) {
-      const fullStars = Math.floor(stars);
-      const halfStar = stars - fullStars >= 0.5;
-      const maxStars = 5;
-      let starsHtml = "";
-
-      for (let i = 0; i < fullStars; i++) {
-        starsHtml += "★";
-      }
-      if (halfStar) starsHtml += "☆";
-      for (let i = starsHtml.length; i < maxStars; i++) {
-        starsHtml += "<span style='color:#ddd;'>★</span>";
-      }
-      return starsHtml;
-    }
-
-    function updateUI(data) {
-      resultsContainer.style.display = "flex";
-
-      document.getElementById("bizName").textContent = data.name;
-      document.getElementById("bizAddress").textContent = data.address;
-      document.getElementById("bizCategory").textContent = data.category;
-
-      document.getElementById("starsDisplay").innerHTML = displayStars(data.stars);
-      document.getElementById("reviewCount").textContent = data.reviews;
-
-      const keywordList = document.getElementById("keywordList");
-      keywordList.innerHTML = "";
-      data.keywords.forEach(kw => {
-        const li = document.createElement("li");
-        li.textContent = kw;
-        keywordList.appendChild(li);
-      });
-
-      const rankingTable = document.getElementById("rankingTable");
-      rankingTable.innerHTML = "";
-      data.ranking.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${item.position}</td><td>${item.name}</td><td>${item.distance}</td>`;
-        rankingTable.appendChild(tr);
-      });
-
-      const recList = document.getElementById("recommendationsList");
-      recList.innerHTML = "";
-      data.recommendations.forEach(rec => {
-        const li = document.createElement("li");
-        li.textContent = rec;
-        recList.appendChild(li);
-      });
-
-      // Mostrar mapa con Leaflet
-      if (window.map) {
-        window.map.remove();
-      }
-      window.map = L.map('map').setView([data.location.lat, data.location.lng], 15);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(window.map);
-
-      L.marker([data.location.lat, data.location.lng]).addTo(window.map)
-        .bindPopup(data.name)
-        .openPopup();
-    }
-
-    form.addEventListener("submit", e => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const businessName = document.getElementById("businessName").value.trim();
-      if (!businessName) return;
+      const name = document.getElementById('name').value;
+      const address = document.getElementById('address').value;
+      const keyword = document.getElementById('keyword').value;
 
-      // Aquí deberías llamar al API de Local Falcon o Google para obtener datos reales.
-      // Por ahora usamos datos simulados.
-      const data = getSimulatedData(businessName);
-      updateUI(data);
+      resultsDiv.innerHTML = '<p>Generando análisis... esto puede tardar unos segundos.</p>';
+
+      const scanCreation = await fetch('https://api.localfalcon.com/api/v2/scans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': API_KEY
+        },
+        body: JSON.stringify({
+          business_name: name,
+          address: address,
+          keyword: keyword,
+          search_radius: 2
+        })
+      });
+
+      const scanData = await scanCreation.json();
+
+      if (!scanData.scan_id) {
+        resultsDiv.innerHTML = '<p>Error al generar el análisis. Verificá los datos ingresados.</p>';
+        return;
+      }
+
+      const scanId = scanData.scan_id;
+      await new Promise(resolve => setTimeout(resolve, 8000));
+
+      const resultRes = await fetch(`https://api.localfalcon.com/api/v2/scan-result/${scanId}`, {
+        headers: {
+          'Authorization': API_KEY
+        }
+      });
+      const result = await resultRes.json();
+
+      if (!result || !result.data) {
+        resultsDiv.innerHTML = '<p>No se encontraron resultados válidos.</p>';
+        return;
+      }
+
+      const arp = result.data.arp;
+      const count = result.data.grid_points?.length || 'varios';
+      const reviews = result.data.reviews?.slice(0, 3) || [];
+      const posts = result.data.google_posts?.slice(0, 2) || [];
+      const keywords = result.data.keyword_suggestions || [];
+
+      resultsDiv.innerHTML = `
+        <h2>Resultados del análisis:</h2>
+        <p>Posición promedio en Google Maps: <strong>${arp}</strong></p>
+        <p>Total de puntos analizados: <strong>${count}</strong></p>
+        <p class="highlight">El 80% del tráfico de Google Maps se lo llevan los 3 primeros resultados.</p>
+
+        <h3>Últimas reseñas respondidas:</h3>
+        <ul>
+          ${reviews.map(r => `<li><strong>${r.reviewer}</strong>: ${r.text} <em>(${r.date})</em></li>`).join('')}
+        </ul>
+
+        <h3>Últimos posteos en Google:</h3>
+        <ul>
+          ${posts.map(p => `<li>${p.summary} <em>(${p.date})</em></li>`).join('')}
+        </ul>
+
+        <h3>Palabras clave sugeridas:</h3>
+        <ul>
+          ${keywords.map(k => `<li>${k}</li>`).join('')}
+        </ul>
+      `;
     });
   </script>
 </body>
